@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tous les Beats - Studio Harmonique</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        /* Specific adjustments for beats page if needed */
+        main {
+            min-height: 80vh;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navigation -->
+    <nav>
+        <div class="container">
+            <a href="index.html" class="logo">Skylab</a>
+            <div class="menu-toggle" id="menuToggle">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+            <ul id="navMenu">
+                <li><a href="index.html#accueil">Accueil</a></li>
+                <li><a href="index.html#a-propos">À propos</a></li>
+                <li><a href="index.html#services">Services</a></li>
+                <li><a href="beats.html">Beats</a></li>
+                <li><a href="index.html#galerie">Galerie</a></li>
+                <li><a href="index.html#contact">Contact</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main>
+        <div class="page-header">
+            <h1>Tous nos Beats</h1>
+            <p>Parcours l'intégralité de notre catalogue. Trouve l'instru qui matche avec ta vibe et contacte-nous pour
+                en parler.</p>
+        </div>
+
+        <div class="beats-grid" id="beatsContainer">
+            <div class="loading">
+                <i class="fas fa-spinner fa-spin fa-2x"></i>
+                <p>Chargement des beats...</p>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <div class="social-links">
+            <a href="#"><i class="fab fa-instagram"></i></a>
+            <a href="#"><i class="fab fa-facebook"></i></a>
+            <a href="#"><i class="fab fa-youtube"></i></a>
+            <a href="#"><i class="fab fa-spotify"></i></a>
+        </div>
+        <p>&copy; 2025 skylab</p>
+    </footer>
+
+    <!-- Supabase CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <script>
+        // Configuration Supabase (Identique à admin-dashboard.html)
+        const SUPABASE_CONFIG = {
+            url: 'https://hsrmxdtqqclrqlwvvjuh.supabase.co',
+            anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhzcm14ZHRxcWNscnFsd3Z2anVoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjczNDg4NTQsImV4cCI6MjA4MjkyNDg1NH0.60g-JNlS7Ysi-eNL8um9lKyauZYyhi4xqW0S6zxgvv0',
+            whatsappNumber: '22897275798'
+        };
+
+        // Initialiser le client Supabase
+        const supabaseClient = window.supabase.createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.anonKey);
+
+        // ========================================
+        // CHARGEMENT DE TOUS LES BEATS
+        // ========================================
+        async function loadBeats() {
+            const container = document.getElementById('beatsContainer');
+
+            try {
+                // Récupérer TOUS les beats actifs
+                const { data: beats, error } = await supabaseClient
+                    .from('beats')
+                    .select('*')
+                    .eq('is_active', true)
+                    .order('created_at', { ascending: false });
+
+                if (error) throw error;
+
+                container.innerHTML = '';
+
+                if (!beats || beats.length === 0) {
+                    container.innerHTML = '<div class="no-beats"><p>Aucun beat disponible pour le moment.</p></div>';
+                    return;
+                }
+
+                // Afficher tous les beats
+                beats.forEach(beat => {
+                    const beatCard = document.createElement('div');
+                    beatCard.className = 'beat-card';
+                    beatCard.innerHTML = `
+                        <img src="${beat.cover_url || 'https://via.placeholder.com/400x250/1a1a1a/c9a45c?text=No+Cover'}" 
+                             alt="${beat.title}" 
+                             class="beat-cover"
+                             onerror="this.src='https://via.placeholder.com/400x250/1a1a1a/c9a45c?text=No+Cover'">
+                        <div class="beat-info">
+                            <h3>${beat.title}</h3>
+                            <div class="beat-meta">
+                                ${beat.author ? `<span><i class="fas fa-user"></i> ${beat.author}</span>` : ''}
+                                ${beat.genre ? `<span><i class="fas fa-music"></i> ${beat.genre}</span>` : ''}
+                                ${beat.bpm ? `<span><i class="fas fa-drum"></i> ${beat.bpm} BPM</span>` : ''}
+                            </div>
+                            <div class="beat-audio">
+                                <audio controls controlsList="nodownload" oncontextmenu="return false;">
+                                    <source src="${beat.audio_url}" type="audio/mpeg">
+                                    Votre navigateur ne supporte pas l'audio.
+                                </audio>
+                            </div>
+                            <button class="btn-commander" onclick="commandBeat('${beat.title}', '${beat.author || ''}', '${beat.genre || ''}', '${beat.bpm || ''}')">
+                                <i class="fab fa-whatsapp"></i> Commander ce beat
+                            </button>
+                        </div>
+                    `;
+                    container.appendChild(beatCard);
+                });
+
+            } catch (error) {
+                console.error('Erreur lors du chargement des beats:', error);
+                container.innerHTML = `
+                    <div class="no-beats">
+                        <p>Impossible de charger les beats pour le moment.</p>
+                        <p style="font-size: 0.9rem; margin-top: 0.5rem;">Vérifie ta connexion Supabase.</p>
+                    </div>
+                `;
+            }
+        }
+
+        // ========================================
+        // COMMANDE DE BEAT VIA WHATSAPP
+        // ========================================
+        function commandBeat(title, author, genre, bpm) {
+            const message = `Bonjour,
+Je souhaite commander le beat :
+
+🎵 Nom : ${title}
+${author ? `👤 Auteur : ${author}` : ''}
+${genre ? `🎧 Genre : ${genre}` : ''}
+${bpm ? `🔥 BPM : ${bpm}` : ''}
+
+Merci.`;
+
+            const encodedMessage = encodeURIComponent(message);
+            const whatsappURL = `https://wa.me/${SUPABASE_CONFIG.whatsappNumber}?text=${encodedMessage}`;
+
+            window.open(whatsappURL, '_blank');
+        }
+
+        // ========================================
+        // MENU MOBILE
+        // ========================================
+        const menuToggle = document.getElementById('menuToggle');
+        const navMenu = document.getElementById('navMenu');
+
+        menuToggle.addEventListener('click', () => {
+            navMenu.classList.toggle('active');
+        });
+
+        document.querySelectorAll('nav a').forEach(link => {
+            link.addEventListener('click', () => {
+                navMenu.classList.remove('active');
+            });
+        });
+
+        // ========================================
+        // CHARGEMENT INITIAL
+        // ========================================
+        document.addEventListener('DOMContentLoaded', () => {
+            loadBeats();
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,905 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Skylab Studio</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --noir: #0d0d0d;
+            --gris: #1a1a1a;
+            --accent: #2563eb;
+            --blanc: #f2f2f2;
+            --rouge: #dc2626;
+            --vert: #16a34a;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--noir);
+            color: var(--blanc);
+            line-height: 1.6;
+        }
+
+        /* Login Screen */
+        .login-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .login-box {
+            background: var(--gris);
+            padding: 3rem;
+            border-radius: 8px;
+            border: 1px solid rgba(37, 99, 235, 0.2);
+            max-width: 450px;
+            width: 100%;
+        }
+
+        .login-box h1 {
+            color: var(--accent);
+            margin-bottom: 0.5rem;
+            font-size: 2rem;
+        }
+
+        .login-box p {
+            color: rgba(242, 242, 242, 0.6);
+            margin-bottom: 2rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: rgba(242, 242, 242, 0.8);
+            font-size: 0.9rem;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 0.875rem;
+            background: var(--noir);
+            border: 1px solid rgba(37, 99, 235, 0.3);
+            color: var(--blanc);
+            border-radius: 4px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        .btn {
+            padding: 0.875rem 2rem;
+            border: none;
+            border-radius: 4px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            width: 100%;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: var(--blanc);
+        }
+
+        .btn-primary:hover {
+            background: #1d4ed8;
+        }
+
+        .btn-secondary {
+            background: var(--gris);
+            color: var(--blanc);
+            border: 1px solid rgba(37, 99, 235, 0.3);
+        }
+
+        .btn-danger {
+            background: var(--rouge);
+            color: var(--blanc);
+        }
+
+        .btn-danger:hover {
+            background: #b91c1c;
+        }
+
+        .error-message {
+            background: rgba(220, 38, 38, 0.1);
+            border: 1px solid var(--rouge);
+            color: var(--rouge);
+            padding: 1rem;
+            border-radius: 4px;
+            margin-bottom: 1rem;
+        }
+
+        /* Dashboard */
+        .dashboard {
+            display: none;
+        }
+
+        .dashboard.active {
+            display: block;
+        }
+
+        .dashboard-header {
+            background: var(--gris);
+            padding: 1.5rem 5%;
+            border-bottom: 1px solid rgba(37, 99, 235, 0.2);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .dashboard-header h1 {
+            color: var(--accent);
+            font-size: 1.5rem;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-email {
+            color: rgba(242, 242, 242, 0.7);
+            font-size: 0.9rem;
+        }
+
+        .btn-logout {
+            padding: 0.5rem 1.5rem;
+            background: transparent;
+            border: 1px solid var(--rouge);
+            color: var(--rouge);
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-logout:hover {
+            background: var(--rouge);
+            color: var(--blanc);
+        }
+
+        .dashboard-content {
+            padding: 3rem 5%;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .section-header h2 {
+            font-size: 2rem;
+            color: var(--accent);
+        }
+
+        /* Beat Form */
+        .beat-form {
+            background: var(--gris);
+            padding: 2rem;
+            border-radius: 8px;
+            border: 1px solid rgba(37, 99, 235, 0.2);
+            margin-bottom: 3rem;
+        }
+
+        .beat-form h3 {
+            color: var(--accent);
+            margin-bottom: 1.5rem;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .file-input-wrapper {
+            position: relative;
+        }
+
+        .file-input-label {
+            display: block;
+            padding: 0.875rem;
+            background: var(--noir);
+            border: 1px solid rgba(37, 99, 235, 0.3);
+            border-radius: 4px;
+            cursor: pointer;
+            text-align: center;
+            transition: border-color 0.3s;
+        }
+
+        .file-input-label:hover {
+            border-color: var(--accent);
+        }
+
+        .file-input-label i {
+            margin-right: 0.5rem;
+            color: var(--accent);
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        .file-name {
+            font-size: 0.85rem;
+            color: var(--vert);
+            margin-top: 0.5rem;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .form-actions .btn {
+            width: auto;
+            min-width: 150px;
+        }
+
+        /* Beats List */
+        .beats-table {
+            background: var(--gris);
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid rgba(37, 99, 235, 0.2);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background: var(--noir);
+        }
+
+        th {
+            padding: 1rem;
+            text-align: left;
+            color: var(--accent);
+            font-weight: 600;
+        }
+
+        td {
+            padding: 1rem;
+            border-top: 1px solid rgba(37, 99, 235, 0.1);
+        }
+
+        tr:hover {
+            background: rgba(37, 99, 235, 0.05);
+        }
+
+        .beat-cover-thumb {
+            width: 60px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 4px;
+        }
+
+        .beat-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn-icon {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.9rem;
+        }
+
+        .btn-edit {
+            background: rgba(37, 99, 235, 0.2);
+            color: var(--accent);
+        }
+
+        .btn-edit:hover {
+            background: var(--accent);
+            color: var(--blanc);
+        }
+
+        .btn-delete {
+            background: rgba(220, 38, 38, 0.2);
+            color: var(--rouge);
+        }
+
+        .btn-delete:hover {
+            background: var(--rouge);
+            color: var(--blanc);
+        }
+
+        .loading {
+            text-align: center;
+            padding: 3rem;
+            color: var(--accent);
+        }
+
+        .no-beats {
+            text-align: center;
+            padding: 3rem;
+            color: rgba(242, 242, 242, 0.5);
+        }
+
+        .success-message {
+            background: rgba(22, 163, 74, 0.1);
+            border: 1px solid var(--vert);
+            color: var(--vert);
+            padding: 1rem;
+            border-radius: 4px;
+            margin-bottom: 1rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .dashboard-header {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .beats-table {
+                overflow-x: auto;
+            }
+
+            table {
+                min-width: 800px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Login Screen -->
+    <div id="loginScreen" class="login-container">
+        <div class="login-box">
+            <h1><i class="fas fa-lock"></i> Admin Login</h1>
+            <p>Accès réservé aux administrateurs</p>
+
+            <div id="loginError" class="error-message" style="display: none;"></div>
+
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Mot de passe</label>
+                    <input type="password" id="password" required>
+                </div>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-sign-in-alt"></i> Se connecter
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Dashboard -->
+    <div id="dashboard" class="dashboard">
+        <div class="dashboard-header">
+            <h1><i class="fas fa-music"></i> Dashboard Beats</h1>
+            <div class="user-info">
+                <span class="user-email" id="userEmail"></span>
+                <button class="btn-logout" id="logoutBtn">
+                    <i class="fas fa-sign-out-alt"></i> Déconnexion
+                </button>
+            </div>
+        </div>
+
+        <div class="dashboard-content">
+            <!-- Add/Edit Beat Form -->
+            <div class="beat-form">
+                <h3 id="formTitle"><i class="fas fa-plus-circle"></i> Ajouter un Beat</h3>
+
+                <div id="formMessage" style="display: none;"></div>
+
+                <form id="beatForm">
+                    <input type="hidden" id="beatId">
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="title">Titre *</label>
+                            <input type="text" id="title" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="author">Auteur</label>
+                            <input type="text" id="author">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="genre">Genre</label>
+                            <input type="text" id="genre" placeholder="Ex: Trap, Afrobeat, Drill...">
+                        </div>
+                        <div class="form-group">
+                            <label for="bpm">BPM</label>
+                            <input type="number" id="bpm" min="60" max="200">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Cover Image *</label>
+                            <div class="file-input-wrapper">
+                                <label for="coverFile" class="file-input-label">
+                                    <i class="fas fa-image"></i> Choisir une image
+                                </label>
+                                <input type="file" id="coverFile" accept="image/*">
+                                <div id="coverFileName" class="file-name"></div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Fichier Audio *</label>
+                            <div class="file-input-wrapper">
+                                <label for="audioFile" class="file-input-label">
+                                    <i class="fas fa-file-audio"></i> Choisir un audio
+                                </label>
+                                <input type="file" id="audioFile" accept="audio/*">
+                                <div id="audioFileName" class="file-name"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary" id="submitBtn">
+                            <i class="fas fa-save"></i> Enregistrer
+                        </button>
+                        <button type="button" class="btn btn-secondary" id="cancelBtn" style="display: none;">
+                            <i class="fas fa-times"></i> Annuler
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Beats List -->
+            <div class="section-header">
+                <h2>Liste des Beats</h2>
+            </div>
+
+            <div id="beatsListContainer">
+                <div class="loading">
+                    <i class="fas fa-spinner fa-spin fa-2x"></i>
+                    <p>Chargement...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        // Charger la configuration Supabase de manière synchrone
+        // Remplacez ces valeurs par les vôtres depuis supabase-config.js
+        const SUPABASE_CONFIG = {
+            url: 'https://hsrmxdtqqclrqlwvvjuh.supabase.co',
+            anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhzcm14ZHRxcWNscnFsd3Z2anVoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjczNDg4NTQsImV4cCI6MjA4MjkyNDg1NH0.60g-JNlS7Ysi-eNL8um9lKyauZYyhi4xqW0S6zxgvv0',
+            whatsappNumber: '22897275798'
+        };
+
+        // Initialiser Supabase
+        const supabaseClient = window.supabase.createClient(
+            SUPABASE_CONFIG.url,
+            SUPABASE_CONFIG.anonKey
+        );
+
+        // ========================================
+        // AUTHENTICATION
+        // ========================================
+
+        const loginScreen = document.getElementById('loginScreen');
+        const dashboard = document.getElementById('dashboard');
+        const loginForm = document.getElementById('loginForm');
+        const loginError = document.getElementById('loginError');
+        const logoutBtn = document.getElementById('logoutBtn');
+        const userEmail = document.getElementById('userEmail');
+
+        // Check if user is already logged in
+        async function checkAuth() {
+            const { data: { session } } = await supabaseClient.auth.getSession();
+
+            if (session) {
+                showDashboard(session.user);
+            } else {
+                loginScreen.style.display = 'flex';
+                dashboard.classList.remove('active');
+            }
+        }
+
+        // Login
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            try {
+                const { data, error } = await supabaseClient.auth.signInWithPassword({
+                    email,
+                    password
+                });
+
+                if (error) throw error;
+
+                showDashboard(data.user);
+            } catch (error) {
+                loginError.textContent = 'Email ou mot de passe incorrect';
+                loginError.style.display = 'block';
+            }
+        });
+
+        // Logout
+        logoutBtn.addEventListener('click', async () => {
+            await supabaseClient.auth.signOut();
+            loginScreen.style.display = 'flex';
+            dashboard.classList.remove('active');
+            loginForm.reset();
+        });
+
+        function showDashboard(user) {
+            loginScreen.style.display = 'none';
+            dashboard.classList.add('active');
+            userEmail.textContent = user.email;
+            loadBeats();
+        }
+
+        // ========================================
+        // BEAT MANAGEMENT
+        // ========================================
+
+        const beatForm = document.getElementById('beatForm');
+        const formTitle = document.getElementById('formTitle');
+        const formMessage = document.getElementById('formMessage');
+        const submitBtn = document.getElementById('submitBtn');
+        const cancelBtn = document.getElementById('cancelBtn');
+        const beatIdInput = document.getElementById('beatId');
+        const coverFileInput = document.getElementById('coverFile');
+        const audioFileInput = document.getElementById('audioFile');
+        const coverFileName = document.getElementById('coverFileName');
+        const audioFileName = document.getElementById('audioFileName');
+
+        // Helper to sanitize filenames
+        function sanitizeFileName(name) {
+            return name.replace(/[^a-zA-Z0-9.-]/g, '_');
+        }
+
+        // File input display
+        coverFileInput.addEventListener('change', (e) => {
+            if (e.target.files[0]) {
+                coverFileName.textContent = `✓ ${e.target.files[0].name}`;
+            }
+        });
+
+        audioFileInput.addEventListener('change', (e) => {
+            if (e.target.files[0]) {
+                audioFileName.textContent = `✓ ${e.target.files[0].name}`;
+            }
+        });
+
+        // Submit form
+        beatForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const beatId = beatIdInput.value;
+            const isEdit = !!beatId;
+
+            try {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enregistrement...';
+
+                // Get form data
+                const title = document.getElementById('title').value;
+                const author = document.getElementById('author').value;
+                const genre = document.getElementById('genre').value;
+                const bpm = document.getElementById('bpm').value;
+
+                let coverUrl = null;
+                let audioUrl = null;
+
+                // Upload cover if provided
+                if (coverFileInput.files[0]) {
+                    const coverFile = coverFileInput.files[0];
+                    const cleanName = sanitizeFileName(coverFile.name);
+                    const coverPath = `${Date.now()}_${cleanName}`;
+
+                    const { data: coverData, error: coverError } = await supabaseClient.storage
+                        .from('beat-covers')
+                        .upload(coverPath, coverFile);
+
+                    if (coverError) throw coverError;
+
+                    const { data: { publicUrl } } = supabaseClient.storage
+                        .from('beat-covers')
+                        .getPublicUrl(coverPath);
+
+                    coverUrl = publicUrl;
+                }
+
+                // Upload audio if provided
+                if (audioFileInput.files[0]) {
+                    const audioFile = audioFileInput.files[0];
+                    const cleanName = sanitizeFileName(audioFile.name);
+                    const audioPath = `${Date.now()}_${cleanName}`;
+
+                    const { data: audioData, error: audioError } = await supabaseClient.storage
+                        .from('beat-audio')
+                        .upload(audioPath, audioFile);
+
+                    if (audioError) throw audioError;
+
+                    const { data: { publicUrl } } = supabaseClient.storage
+                        .from('beat-audio')
+                        .getPublicUrl(audioPath);
+
+                    audioUrl = publicUrl;
+                }
+
+                // Prepare beat data
+                const beatData = {
+                    title,
+                    author: author || null,
+                    genre: genre || null,
+                    bpm: bpm ? parseInt(bpm) : null,
+                    is_active: true,
+                    updated_at: new Date().toISOString()
+                };
+
+                if (coverUrl) beatData.cover_url = coverUrl;
+                if (audioUrl) beatData.audio_url = audioUrl;
+
+                // Insert or update
+                if (isEdit) {
+                    const { error } = await supabaseClient
+                        .from('beats')
+                        .update(beatData)
+                        .eq('id', beatId);
+
+                    if (error) throw error;
+
+                    showMessage('Beat modifié avec succès !', 'success');
+                } else {
+                    // For new beats, cover and audio are required
+                    if (!coverUrl || !audioUrl) {
+                        throw new Error('Cover et audio sont obligatoires pour un nouveau beat');
+                    }
+
+                    beatData.created_at = new Date().toISOString();
+
+                    const { error } = await supabaseClient
+                        .from('beats')
+                        .insert([beatData]);
+
+                    if (error) throw error;
+
+                    showMessage('Beat ajouté avec succès !', 'success');
+                }
+
+                // Reset form and reload
+                resetForm();
+                loadBeats();
+
+            } catch (error) {
+                console.error('Error:', error);
+                showMessage(error.message || 'Erreur lors de l\'enregistrement', 'error');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fas fa-save"></i> Enregistrer';
+            }
+        });
+
+        // Cancel edit
+        cancelBtn.addEventListener('click', resetForm);
+
+        function resetForm() {
+            beatForm.reset();
+            beatIdInput.value = '';
+            coverFileName.textContent = '';
+            audioFileName.textContent = '';
+            formTitle.innerHTML = '<i class="fas fa-plus-circle"></i> Ajouter un Beat';
+            submitBtn.innerHTML = '<i class="fas fa-save"></i> Enregistrer';
+            cancelBtn.style.display = 'none';
+            coverFileInput.required = true;
+            audioFileInput.required = true;
+        }
+
+        function showMessage(message, type) {
+            formMessage.textContent = message;
+            formMessage.className = type === 'success' ? 'success-message' : 'error-message';
+            formMessage.style.display = 'block';
+
+            setTimeout(() => {
+                formMessage.style.display = 'none';
+            }, 5000);
+        }
+
+        // ========================================
+        // LOAD BEATS
+        // ========================================
+
+        async function loadBeats() {
+            const container = document.getElementById('beatsListContainer');
+
+            try {
+                const { data: beats, error } = await supabaseClient
+                    .from('beats')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+
+                if (error) throw error;
+
+                if (!beats || beats.length === 0) {
+                    container.innerHTML = '<div class="no-beats">Aucun beat pour le moment</div>';
+                    return;
+                }
+
+                // Build table
+                let html = `
+                    <div class="beats-table">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Cover</th>
+                                    <th>Titre</th>
+                                    <th>Auteur</th>
+                                    <th>Genre</th>
+                                    <th>BPM</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                `;
+
+                beats.forEach(beat => {
+                    html += `
+                        <tr>
+                            <td>
+                                <img src="${beat.cover_url || 'https://via.placeholder.com/60'}" 
+                                     alt="${beat.title}" 
+                                     class="beat-cover-thumb">
+                            </td>
+                            <td><strong>${beat.title}</strong></td>
+                            <td>${beat.author || '-'}</td>
+                            <td>${beat.genre || '-'}</td>
+                            <td>${beat.bpm || '-'}</td>
+                            <td>
+                                <div class="beat-actions">
+                                    <button class="btn-icon btn-edit" onclick="editBeat('${beat.id}')">
+                                        <i class="fas fa-edit"></i> Modifier
+                                    </button>
+                                    <button class="btn-icon btn-delete" onclick="deleteBeat('${beat.id}', '${beat.title}')">
+                                        <i class="fas fa-trash"></i> Supprimer
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                });
+
+                html += `
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+
+                container.innerHTML = html;
+
+            } catch (error) {
+                console.error('Error loading beats:', error);
+                container.innerHTML = '<div class="no-beats">Erreur lors du chargement</div>';
+            }
+        }
+
+        // ========================================
+        // EDIT BEAT
+        // ========================================
+
+        window.editBeat = async function (beatId) {
+            try {
+                const { data: beat, error } = await supabaseClient
+                    .from('beats')
+                    .select('*')
+                    .eq('id', beatId)
+                    .single();
+
+                if (error) throw error;
+
+                // Fill form
+                beatIdInput.value = beat.id;
+                document.getElementById('title').value = beat.title;
+                document.getElementById('author').value = beat.author || '';
+                document.getElementById('genre').value = beat.genre || '';
+                document.getElementById('bpm').value = beat.bpm || '';
+
+                // Update UI
+                formTitle.innerHTML = '<i class="fas fa-edit"></i> Modifier le Beat';
+                submitBtn.innerHTML = '<i class="fas fa-save"></i> Mettre à jour';
+                cancelBtn.style.display = 'inline-block';
+
+                // Make files optional for edit
+                coverFileInput.required = false;
+                audioFileInput.required = false;
+
+                // Scroll to form
+                beatForm.scrollIntoView({ behavior: 'smooth' });
+
+            } catch (error) {
+                console.error('Error loading beat:', error);
+                alert('Erreur lors du chargement du beat');
+            }
+        };
+
+        // ========================================
+        // DELETE BEAT
+        // ========================================
+
+        window.deleteBeat = async function (beatId, beatTitle) {
+            if (!confirm(`Êtes-vous sûr de vouloir supprimer "${beatTitle}" ?`)) {
+                return;
+            }
+
+            try {
+                const { error } = await supabaseClient
+                    .from('beats')
+                    .delete()
+                    .eq('id', beatId);
+
+                if (error) throw error;
+
+                showMessage('Beat supprimé avec succès !', 'success');
+                loadBeats();
+
+            } catch (error) {
+                console.error('Error deleting beat:', error);
+                alert('Erreur lors de la suppression');
+            }
+        };
+
+        // ========================================
+        // INIT
+        // ========================================
+
+        // Attendre que supabase soit chargé
+        window.addEventListener('DOMContentLoaded', () => {
+            // Vérifier que supabase est disponible
+            if (typeof window.supabase === 'undefined') {
+                console.error('Supabase n\'est pas chargé. Vérifiez supabase-config.js');
+                loginError.textContent = 'Erreur de configuration. Contactez l\'administrateur.';
+                loginError.style.display = 'block';
+                return;
+            }
+            checkAuth();
+        });
+    </script>
+</body>
+
+</html>
