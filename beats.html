@@ -128,6 +128,17 @@
                             </button>
                         </div>
                     `;
+
+                    // Add single playback logic
+                    const audio = beatCard.querySelector('audio');
+                    audio.addEventListener('play', () => {
+                        document.querySelectorAll('audio').forEach(otherAudio => {
+                            if (otherAudio !== audio) {
+                                otherAudio.pause();
+                            }
+                        });
+                    });
+
                     container.appendChild(beatCard);
                 });
 

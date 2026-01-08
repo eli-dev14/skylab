@@ -448,7 +448,19 @@
                                 <i class="fab fa-whatsapp"></i> Commander
                             </button>
                         </div>
-                    `; container.appendChild(beatCard);
+                    `;
+
+                    // Add single playback logic
+                    const audio = beatCard.querySelector('audio');
+                    audio.addEventListener('play', () => {
+                        document.querySelectorAll('audio').forEach(otherAudio => {
+                            if (otherAudio !== audio) {
+                                otherAudio.pause();
+                            }
+                        });
+                    });
+
+                    container.appendChild(beatCard);
                 });
 
             } catch (error) {
